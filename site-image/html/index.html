@@ -244,8 +244,7 @@
     <section>
       <h2>DNS</h2>
       <p>
-        <code>vin.moe</code>'s A record points at the node's IP through the
-        Cloudflare provider, proxied — orange-clouded, not grey. Combined
+        <code>vin.moe</code>'s A record points at the node's IP through a proxied Cloudflare record. Combined
         with DNS-01 above, none of Let's Encrypt's validation traffic ever
         needs to reach the origin at all; the only thing that has to be
         reachable is the origin's own valid cert, and only Cloudflare needs
