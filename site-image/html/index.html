@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="/favicon.ico" />
+  <title>Finlay — vin.moe</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d0f12;
+      --fg: #e6e6e6;
+      --muted: #8a8f98;
+      --accent: #f7b9d1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    main {
+      max-width: 640px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 2rem;
+      margin: 0 0 0.25rem;
+    }
+    .tagline {
+      color: var(--accent);
+      margin: 0 0 1.5rem;
+      font-size: 1rem;
+    }
+    nav {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    nav a {
+      color: var(--fg);
+      text-decoration: none;
+      border-bottom: 1px solid var(--muted);
+      padding-bottom: 2px;
+    }
+    nav a:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    section {
+      border-top: 1px solid #22262c;
+      padding-top: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    section h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+    }
+    section p, section ul {
+      line-height: 1.6;
+      color: #c7cad1;
+      margin: 0 0 0.75rem;
+    }
+    code {
+      color: var(--accent);
+      background: #161a20;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    footer {
+      margin-top: 2rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Finlay</h1>
+    <p class="tagline">Infra / DevOps / Software</p>
+
+    <nav>
+      <a href="https://tr.ee/vin">GitHub</a>
+      <a href="mailto:a@vin.moe">a@vin.moe</a>
+    </nav>
+
+    <nav>
+      <a href="#about" data-panel="about">About Me</a>
+      <a href="#how-this-site-runs" data-panel="how-this-site-runs">How this site runs</a>
+    </nav>
+
+    <section id="about" class="panel active">
+      <h2>About Me</h2>
+      <p>
+        Hello, my name is Finlay.
+      </p>
+      <p>
+        I've been working with computers since I was 11 — game mods,
+        personal QoL tools, operating systems, general programming, and
+        whatever else seemed interesting at the time.
+      </p>
+      <p>
+        Currently, I am an Infrastructure Engineer at a large financial institution, focused on GCP. Since starting, I've grown into a trusted and valued member of my team and become an observability SME for       the entire department, the person teams come to when things need building or things break.
+      </p>
+      <p>
+        Looking forward to seeing how far this goes.
+      </p>
+    </section>
+
+    <div id="how-this-site-runs" class="panel">
+    <section>
+      <h2>How this site runs</h2>
+      <p>
+        The node, the cluster, ingress, the container registry, DNS, the
+        image build, and the Deployment spec are all Terraform, applied
+        through HCP Terraform, in a private repo. The site itself is a
+        static HTML/CSS page.
+      </p>
+      <p>
+        Push to merge, live in ~44 seconds: build, registry push, rollout
+        restart.
+      </p>
+      <p>
+        AI wrote the HTML/CSS on this page. I do infra, not frontend.
+      </p>
+    </section>
+
+    <section>
+      <h2>Cluster</h2>
+      <p>
+        One <code>Talos</code> node. Control plane and worker, same box
+        (<code>allowSchedulingOnControlPlanes</code>). No managed Kubernetes
+        underneath. The node itself is provisioned out-of-band; Terraform
+        bootstraps it with the <code>siderolabs/talos</code> provider and
+        stores the resulting kubeconfig as state.
+      </p>
+    </section>
+
+    <section>
+      <h2>Registry</h2>
+      <p>
+        Harbor, self-hosted on the same cluster, at
+        <code>registry.vinnel.cloud</code>. This site gets its own
+        <code>harbor_project</code>, but pushes and pulls all go through one
+        shared CI robot account (system-level, push+pull on every project) so
+        the same credentials work for this site, monke-academy, and
+        vinnel-cloud. The robot's password is a Terraform
+        <code>random_password</code>, never typed anywhere by hand, packaged
+        into a <code>dockerconfigjson</code> secret in the <code>websites</code>
+        namespace and mounted as an <code>imagePullSecret</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Image</h2>
+      <p>
+        Two-stage Dockerfile. Stage one is Alpine plus
+        <code>imagemagick</code>, converting the source PNG into a
+        multi-resolution <code>favicon.ico</code> (16/32/48/64). Stage two is
+        <code>nginx:alpine</code> with <code>nginx.conf</code>, the static
+        HTML, and the favicon from the first stage copied in. The nginx
+        config is one server block: <code>try_files</code> with a 404
+        fallback, no other routes.
+      </p>
+    </section>
+
+    <section>
+      <h2>Ingress &amp; TLS</h2>
+      <p>
+        <code>ingress-nginx</code> runs as a <code>DaemonSet</code> with
+        <code>hostNetwork: true</code>, bound directly to the node's public
+        IP. No load balancer — one node.
+      </p>
+      <p>
+        Each domain has its own <code>cert-manager</code>
+        <code>ClusterIssuer</code>, solving via DNS-01 against Cloudflare
+        (same API token, stored as a Kubernetes secret), not HTTP-01. The DNS
+        record for this domain is proxied through Cloudflare rather than
+        pointed at the origin directly, and DNS-01 doesn't require the origin
+        to be reachable — it only needs to write a TXT record. The zone's
+        SSL mode is set to <code>strict</code>, so Cloudflare only forwards
+        traffic to the origin if it presents a currently-valid cert, not a
+        self-signed one and not Cloudflare's own origin CA. TLS is
+        independently valid on both hops: browser to Cloudflare edge,
+        Cloudflare edge to origin.
+      </p>
+    </section>
+
+    <section>
+      <h2>Deployment &amp; resources</h2>
+      <p>
+        Two replicas of <code>nginx:alpine</code> behind a
+        <code>ClusterIP</code> Service, <code>50m</code> CPU / <code>16Mi</code>
+        memory requested, <code>200m</code> / <code>64Mi</code> as the limit,
+        readiness probe hitting <code>/</code> every 10 seconds. A
+        <code>VerticalPodAutoscaler</code> in <code>Auto</code> mode adjusts
+        the memory request within that 16–64Mi band based on observed usage.
+        CPU is not managed by the VPA.
+      </p>
+    </section>
+
+    <section>
+      <h2>Build &amp; deploy</h2>
+      <p>
+        A push to the site's path on <code>prd</code> (or a manual
+        <code>workflow_dispatch</code>) triggers GitHub Actions: log into
+        Harbor with the CI robot's credentials, <code>buildx</code> build and
+        push back to the same <code>:latest</code> tag. The workflow then
+        writes a kubeconfig from a repo secret and runs
+        <code>kubectl rollout restart</code> followed by
+        <code>rollout status --timeout=120s</code>. The tag never changes, so
+        the restart is what forces Kubernetes to re-pull the image.
+      </p>
+    </section>
+
+    <section>
+      <h2>Mirror</h2>
+      <p>
+        A second job in the same workflow rsyncs two things out to a
+        separate public GitHub repo, using a scoped token: the site source
+        into <code>site-image/</code>, and the workflow file itself into
+        <code>github-workflow/</code>. It commits and pushes only if
+        something actually changed. So the source lives in two places: the
+        private infra monorepo, where it's actually written and built, and a
+        public read-only mirror for anyone who wants to see what's rendering
+        this page.
+      </p>
+    </section>
+
+    <section>
+      <h2>DNS</h2>
+      <p>
+        <code>vin.moe</code>'s A record points at the node's IP through the
+        Cloudflare provider, proxied — orange-clouded, not grey. Combined
+        with DNS-01 above, none of Let's Encrypt's validation traffic ever
+        needs to reach the origin at all; the only thing that has to be
+        reachable is the origin's own valid cert, and only Cloudflare needs
+        to see it.
+      </p>
+    </section>
+    </div>
+
+    <footer>vin.moe</footer>
+  </main>
+
+  <script>
+    document.querySelectorAll('nav a[data-panel]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
+        document.getElementById(link.dataset.panel).classList.add('active');
+        history.replaceState(null, '', link.getAttribute('href'));
+      });
+    });
+  </script>
+</body>
+</html>

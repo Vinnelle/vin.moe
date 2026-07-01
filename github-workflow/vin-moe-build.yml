@@ -1,0 +1,64 @@
+name: vin-moe site build
+
+on:
+  push:
+    branches: [prd]
+    paths:
+      - "projects/hestia/vin-moe/site/**"
+      - ".github/workflows/vin-moe-build.yml"
+  workflow_dispatch: {}
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: registry.vinnel.cloud
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: projects/hestia/vin-moe/site
+          push: true
+          tags: registry.vinnel.cloud/vin-moe/site:latest
+
+      - run: |
+          mkdir -p ~/.kube
+          cat <<'EOF' > ~/.kube/config
+          ${{ secrets.HESTIA_KUBECONFIG }}
+          EOF
+
+      - run: |
+          kubectl rollout restart deployment/vin-moe-site -n websites
+          kubectl rollout status deployment/vin-moe-site -n websites --timeout=120s
+
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: love
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Vinnelle/vin.moe
+          token: ${{ secrets.VIN_MOE_MIRROR_TOKEN }}
+          path: vin.moe
+
+      - run: |
+          mkdir -p vin.moe/site-image vin.moe/github-workflow
+          rsync -a --delete --exclude='.git' love/projects/hestia/vin-moe/site/ vin.moe/site-image/
+          rsync -a love/.github/workflows/vin-moe-build.yml vin.moe/github-workflow/
+          cd vin.moe
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet && exit 0
+          git commit -m "sync: mirror vin-moe source from love@${{ github.sha }}"
+          git push
