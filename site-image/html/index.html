@@ -155,10 +155,7 @@
       <p>
         Harbor, self-hosted on the same cluster, at
         <code>registry.vinnel.cloud</code>. This site gets its own
-        <code>harbor_project</code>, but pushes and pulls all go through one
-        shared CI robot account (system-level, push+pull on every project) so
-        the same credentials work for this site, monke-academy, and
-        vinnel-cloud. The robot's password is a Terraform
+        <code>harbor_project</code>. Pushes and pulls go through a CI robot account. The robot's password is a Terraform
         <code>random_password</code>, never typed anywhere by hand, packaged
         into a <code>dockerconfigjson</code> secret in the <code>websites</code>
         namespace and mounted as an <code>imagePullSecret</code>.
