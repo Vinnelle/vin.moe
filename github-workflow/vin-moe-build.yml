@@ -4,7 +4,7 @@ on:
   push:
     branches: [prd]
     paths:
-      - "projects/hestia/vin-moe/site/**"
+      - "hestia/vin-moe/site/**"
       - ".github/workflows/vin-moe-build.yml"
       - ".github/workflows/site-deploy.yml"
   workflow_dispatch: {}
@@ -13,7 +13,7 @@ jobs:
   deploy:
     uses: ./.github/workflows/site-deploy.yml
     with:
-      context: projects/hestia/vin-moe/site
+      context: hestia/vin-moe/site
       image: vin-moe/site
       deployment: vin-moe-site
     secrets: inherit
@@ -34,7 +34,7 @@ jobs:
 
       - run: |
           mkdir -p vin.moe/site-image vin.moe/github-workflow
-          rsync -a --delete --exclude='.git' hestia/projects/hestia/vin-moe/site/ vin.moe/site-image/
+          rsync -a --delete --exclude='.git' hestia/hestia/vin-moe/site/ vin.moe/site-image/
           rsync -a hestia/.github/workflows/vin-moe-build.yml vin.moe/github-workflow/
           cd vin.moe
           git config user.name "github-actions[bot]"
