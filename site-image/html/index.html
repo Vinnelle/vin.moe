@@ -1,266 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="/favicon.ico" />
-  <title>Finlay — vin.moe</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0d0f12;
-      --fg: #e6e6e6;
-      --muted: #8a8f98;
-      --accent: #f7b9d1;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 2rem;
-    }
-    main {
-      max-width: 640px;
-      width: 100%;
-    }
-    h1 {
-      font-size: 2rem;
-      margin: 0 0 0.25rem;
-    }
-    .tagline {
-      color: var(--accent);
-      margin: 0 0 1.5rem;
-      font-size: 1rem;
-    }
-    nav {
-      display: flex;
-      gap: 1.25rem;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-    }
-    nav a {
-      color: var(--fg);
-      text-decoration: none;
-      border-bottom: 1px solid var(--muted);
-      padding-bottom: 2px;
-    }
-    nav a:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    section {
-      border-top: 1px solid #22262c;
-      padding-top: 1.5rem;
-      margin-top: 1.5rem;
-    }
-    .panel { display: none; }
-    .panel.active { display: block; }
-    section h2 {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--muted);
-      margin: 0 0 0.75rem;
-    }
-    section p, section ul {
-      line-height: 1.6;
-      color: #c7cad1;
-      margin: 0 0 0.75rem;
-    }
-    code {
-      color: var(--accent);
-      background: #161a20;
-      padding: 0.1rem 0.35rem;
-      border-radius: 3px;
-      font-size: 0.9em;
-    }
-    footer {
-      margin-top: 2rem;
-      color: var(--muted);
-      font-size: 0.8rem;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finlay — vin.moe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: #0c0c0d;
+    color: #cececa;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    padding: clamp(2rem, 7vh, 5rem) clamp(1.1rem, 5vw, 1.4rem) 4rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  ::selection { background: rgba(247,185,209,0.25); color: #fff; }
+  a { color: #f7b9d1; text-decoration: none; }
+  a:hover { color: #fbd3e2; }
+  main { max-width: 680px; width: 100%; }
+
+  header { margin-bottom: 2.4rem; }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.01em; color: #ededea; margin: 0 0 0.3rem; }
+  .tagline { margin: 0; color: #74746f; font-size: 0.9rem; }
+
+  nav { display: flex; flex-wrap: wrap; gap: 0.7rem clamp(0.9rem, 4vw, 1.6rem); margin-bottom: 2.2rem; align-items: baseline; }
+  nav .sep { color: #5c5c58; user-select: none; }
+  .tab {
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #74746f;
+    text-decoration: none;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 1px;
+    white-space: nowrap;
+    transition: color 0.15s;
+  }
+  .tab.active { color: #f7b9d1; text-decoration: underline; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  p { line-height: 1.75; margin: 0 0 1.15rem; }
+  .lead { color: #cececa; }
+  .muted { color: #a9a9a3; }
+  .dim { color: #74746f; font-size: 0.9rem; }
+  .label { color: #5c5c58; font-size: 0.8rem; margin-bottom: 0.2rem; }
+
+  .links { border-top: 1px solid #1e1e1f; padding-top: 1.3rem; display: flex; gap: 2.4rem; flex-wrap: wrap; margin-top: 1.25rem; }
+  .links .k { color: #5c5c58; font-size: 0.8rem; margin-bottom: 0.35rem; }
+
+  ul { list-style: none; margin: 0 0 2.4rem; padding: 0; display: flex; flex-direction: column; }
+  ul.last { margin-bottom: 0; }
+  li { display: flex; gap: 0.9rem; line-height: 1.7; border-top: 1px solid #1e1e1f; padding: 1.05rem 0; }
+  li .bullet { color: #454542; flex-shrink: 0; }
+  li span:last-child { color: #cececa; }
+
+  .topic { border-top: 1px solid #1e1e1f; padding: 1.4rem 0; }
+  .topic-head { display: flex; align-items: baseline; gap: 0.7rem; margin-bottom: 0.55rem; }
+  .topic-num { color: #454542; font-size: 0.85rem; }
+  .topic h2 { font-size: 0.95rem; font-weight: 700; color: #ededea; margin: 0; }
+  .topic p { color: #a3a39d; font-size: 0.92rem; margin: 0; }
+
+  footer { margin-top: 3rem; color: #454542; font-size: 0.82rem; }
+</style>
 </head>
 <body>
-  <main>
+<main>
+  <header>
     <h1>Finlay</h1>
-    <p class="tagline">Infra / DevOps / Software</p>
+    <p class="tagline">infrastructure &middot; devops &middot; software</p>
+  </header>
 
-    <nav>
-      <a href="https://tr.ee/vin">GitHub</a>
-      <a href="mailto:a@vin.moe">a@vin.moe</a>
-    </nav>
+  <nav>
+    <button class="tab active" data-tab="about">about</button>
+    <span class="sep" aria-hidden="true">/</span>
+    <button class="tab" data-tab="work">things i've done</button>
+    <span class="sep" aria-hidden="true">/</span>
+    <button class="tab" data-tab="runs">how this site runs</button>
+  </nav>
 
-    <nav>
-      <a href="#about" data-panel="about">About Me</a>
-      <a href="#how-this-site-runs" data-panel="how-this-site-runs">How this site runs</a>
-      <a href="https://github.com/Vinnelle/vin.moe">Site Repo</a>
-    </nav>
+  <!-- ABOUT -->
+  <section class="panel active" id="about">
+    <p class="lead">Hello, my name is Finlay.</p>
+    <p class="muted">I've been working with computers since I was 11 — game mods, personal QoL tools, operating systems, general programming, and whatever else seemed interesting at the time.</p>
+    <p class="muted">Currently I'm an infrastructure engineer at a large financial institution, focused on GCP. Since starting I've grown into a trusted member of my team and the observability SME for the department — the person people come to when something needs building or something breaks.</p>
+    <p class="lead">Looking forward to seeing how far this goes.</p>
 
-    <section id="about" class="panel active">
-      <h2>About Me</h2>
-      <p>
-        Hello, my name is Finlay.
-      </p>
-      <p>
-        I've been working with computers since I was 11 — game mods,
-        personal QoL tools, operating systems, general programming, and
-        whatever else seemed interesting at the time.
-      </p>
-      <p>
-        Currently, I am an Infrastructure Engineer at a large financial institution, focused on GCP. Since starting, I've grown into a trusted and valued member of my team and become an observability SME for       the entire department, the person teams come to when things need building or things break.
-      </p>
-      <p>
-        Looking forward to seeing how far this goes.
-      </p>
-    </section>
+    <div class="links">
+      <div>
+        <div class="k"># github</div>
+        <a href="https://tr.ee/vin">tr.ee/vin</a>
+      </div>
+      <div>
+        <div class="k"># email</div>
+        <a href="mailto:a@vin.moe">a@vin.moe</a>
+      </div>
+    </div>
+  </section>
 
-    <div id="how-this-site-runs" class="panel">
-    <section>
-      <h2>How this site runs</h2>
-      <p>
-        The node, the cluster, ingress, the container registry, DNS, the
-        image build, and the Deployment spec are all Terraform, applied
-        through HCP Terraform, in a private repo. The site itself is a
-        static HTML/CSS page.
-      </p>
-      <p>
-        Push to merge, live in ~44 seconds: build, registry push, rollout
-        restart.
-      </p>
-      <p>
-        AI wrote the HTML/CSS on this page. I do infra, not frontend.
-      </p>
-    </section>
+  <!-- WORK -->
+  <section class="panel" id="work">
+    <p class="muted" style="margin-bottom:2.2rem;">Things I've built, fixed, and improved — at work and on my own.</p>
 
-    <section>
-      <h2>Cluster</h2>
-      <p>
-        One <code>Talos</code> node. Control plane and worker, same box
-        (<code>allowSchedulingOnControlPlanes</code>). No managed Kubernetes
-        underneath. The node itself is provisioned out-of-band; Terraform
-        bootstraps it with the <code>siderolabs/talos</code> provider and
-        stores the resulting kubeconfig as state.
-      </p>
-    </section>
+    <div class="label"># work</div>
+    <ul>
+      <li><span class="bullet">–</span><span>Built, tested, and documented my team's Jenkins pipeline metrics collection, feeding failure and SLO alerting into our observability platform — now adopted department-wide.</span></li>
+      <li><span class="bullet">–</span><span>Built custom alerting for RHEL servers on GCE, focused on LDAP/S authentication failures surfaced through our observability platform.</span></li>
+      <li><span class="bullet">–</span><span>Shipped GCP upstream ServiceHealth alerting via Cloud Run into PowerBI and our observability platform, giving the company incident tracking and callout for any affected resource or region.</span></li>
+      <li><span class="bullet">–</span><span>Reworked our bespoke platform health-check pipelines — ~58s faster, ~200 fewer lines, wired into GCP SLOs and observability.</span></li>
+      <li><span class="bullet">–</span><span>Designed the rollout of a new compliance tool into our internal cloud provisioning and GitOps pipelines.</span></li>
+      <li><span class="bullet">–</span><span>Serve as the observability SME for the whole department — supporting other teams and fielding questions on the platform.</span></li>
+      <li><span class="bullet">–</span><span>Zero downtime to date — no incident caused by any change or fix, planned or unplanned.</span></li>
+    </ul>
 
-    <section>
-      <h2>Registry</h2>
-      <p>
-        Self hosted <code>Harbor</code> instance on the same cluster. This site gets its own
-        <code>harbor_project</code>. Pushes and pulls go through a CI robot account. The robot's password is a Terraform
-        <code>random_password</code>, never typed anywhere by hand, packaged
-        into a <code>dockerconfigjson</code> secret in the <code>websites</code>
-        namespace and mounted as an <code>imagePullSecret</code>.
-      </p>
-    </section>
+    <div class="label"># personal</div>
+    <ul class="last">
+      <li><span class="bullet">–</span><span>Ran a fully code-managed GCP stack for my personal cloud before moving to dedicated hardware.</span></li>
+      <li><span class="bullet">–</span><span>Migrated from GCP to a self-hosted setup with minimal disruption and downtime.</span></li>
+      <li><span class="bullet">–</span><span>Secured every service on my server with layered high- and low-level practices and self-hosted tooling.</span></li>
+      <li><span class="bullet">–</span><span>Built and maintain a homelab and Ubiquiti network — multiple servers, storage arrays, switches, WAPs, gateways, a UPS, a firewall, and a Raspberry Pi running network analysis, SIEM, ad-blocking, and custom DNS.</span></li>
+    </ul>
+  </section>
 
-    <section>
-      <h2>Image</h2>
-      <p>
-        Two-stage Dockerfile. Stage one is Alpine plus
-        <code>imagemagick</code>, converting the source PNG into a
-        multi-resolution <code>favicon.ico</code> (16/32/48/64). Stage two is
-        <code>nginx:alpine</code> with <code>nginx.conf</code>, the static
-        HTML, and the favicon from the first stage copied in. The nginx
-        config is one server block: <code>try_files</code> with a 404
-        fallback, no other routes.
-      </p>
-    </section>
+  <!-- RUNS -->
+  <section class="panel" id="runs">
+    <p class="muted">The node, cluster, ingress, container registry, DNS, image build, and Deployment spec are all Terraform, applied through HCP Terraform in a private repo. The site itself is a static HTML/CSS page.</p>
+    <p class="lead">Push to merge, live in ~44 seconds — build, registry push, rollout restart.</p>
+    <p class="dim" style="margin-bottom:2.4rem;"><em>AI wrote the HTML/CSS on this page. I do infra, not frontend.</em></p>
 
-    <section>
-      <h2>Ingress &amp; TLS</h2>
-      <p>
-        <code>ingress-nginx</code> runs as a <code>DaemonSet</code> with
-        <code>hostNetwork: true</code>, bound directly to the node's public
-        IP. No load balancer — one node.
-      </p>
-      <p>
-        Each domain has its own <code>cert-manager</code>
-        <code>ClusterIssuer</code>, solving via DNS-01 against Cloudflare
-        (same API token, stored as a Kubernetes secret), not HTTP-01. The DNS
-        record for this domain is proxied through Cloudflare rather than
-        pointed at the origin directly, and DNS-01 doesn't require the origin
-        to be reachable — it only needs to write a TXT record. The zone's
-        SSL mode is set to <code>strict</code>, so Cloudflare only forwards
-        traffic to the origin if it presents a currently-valid cert, not a
-        self-signed one and not Cloudflare's own origin CA. TLS is
-        independently valid on both hops: browser to Cloudflare edge,
-        Cloudflare edge to origin.
-      </p>
-    </section>
-
-    <section>
-      <h2>Deployment &amp; resources</h2>
-      <p>
-        Two replicas of <code>nginx:alpine</code> behind a
-        <code>ClusterIP</code> Service, <code>50m</code> CPU / <code>16Mi</code>
-        memory requested, <code>200m</code> / <code>64Mi</code> as the limit,
-        readiness probe hitting <code>/</code> every 10 seconds. A
-        <code>VerticalPodAutoscaler</code> in <code>Auto</code> mode adjusts
-        the memory request within that 16–64Mi band based on observed usage.
-        CPU is not managed by the VPA.
-      </p>
-    </section>
-
-    <section>
-      <h2>Build &amp; deploy</h2>
-      <p>
-        A push to the site's path on <code>prd</code> (or a manual
-        <code>workflow_dispatch</code>) triggers GitHub Actions: log into
-        Harbor with the CI robot's credentials, <code>buildx</code> build and
-        push back to the same <code>:latest</code> tag. The workflow then
-        writes a kubeconfig from a repo secret and runs
-        <code>kubectl rollout restart</code> followed by
-        <code>rollout status --timeout=120s</code>. The tag never changes, so
-        the restart is what forces Kubernetes to re-pull the image.
-      </p>
-    </section>
-
-    <section>
-      <h2>Mirror</h2>
-      <p>
-        A second job in the same workflow rsyncs two things out to a
-        separate public GitHub repo, using a scoped token: the site source
-        into <code>site-image/</code>, and the workflow file itself into
-        <code>github-workflow/</code>. It commits and pushes only if
-        something actually changed. So the source lives in two places: the
-        private infra monorepo, where it's actually written and built, and a
-        public read-only mirror for anyone who wants to see what's rendering
-        this page.
-      </p>
-    </section>
-
-    <section>
-      <h2>DNS</h2>
-      <p>
-        <code>vin.moe</code>'s A record points at the node's IP through a proxied Cloudflare record. Combined
-        with DNS-01 above, none of Let's Encrypt's validation traffic ever
-        needs to reach the origin at all; the only thing that has to be
-        reachable is the origin's own valid cert, and only Cloudflare needs
-        to see it.
-      </p>
-    </section>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">01</span><h2>cluster</h2></div>
+      <p>One Talos node. Control plane and worker, same box (allowSchedulingOnControlPlanes). No managed Kubernetes underneath. The node is provisioned out-of-band; Terraform bootstraps it with the siderolabs/talos provider and stores the resulting kubeconfig as state.</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">02</span><h2>registry</h2></div>
+      <p>Self-hosted Harbor on the same cluster. This site gets its own harbor_project. Pushes and pulls go through a CI robot account whose password is a Terraform random_password — never typed by hand — packaged into a dockerconfigjson secret and mounted as an imagePullSecret.</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">03</span><h2>image</h2></div>
+      <p>Two-stage Dockerfile. Stage one is Alpine + imagemagick, converting the source PNG into a multi-resolution favicon.ico (16/32/48/64). Stage two is nginx:alpine with nginx.conf, the static HTML, and the favicon copied in. One server block: try_files with a 404 fallback.</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">04</span><h2>ingress &amp; tls</h2></div>
+      <p>ingress-nginx runs as a DaemonSet with hostNetwork: true, bound to the node's public IP. No load balancer. Each domain has its own cert-manager ClusterIssuer solving via DNS-01 against Cloudflare. Zone SSL mode is strict, so TLS is independently valid on both hops: browser→edge and edge→origin.</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">05</span><h2>deployment</h2></div>
+      <p>Two replicas of nginx:alpine behind a ClusterIP Service. 50m CPU / 16Mi requested, 200m / 64Mi limit, readiness probe on / every 10s. A VerticalPodAutoscaler in Auto mode tunes the memory request in that band; CPU is left unmanaged.</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">06</span><h2>build &amp; deploy</h2></div>
+      <p>A push to the site's path on prd (or a manual workflow_dispatch) triggers GitHub Actions: log into Harbor, buildx build, push back to the same :latest tag, then kubectl rollout restart + rollout status. The tag never changes, so the restart forces the re-pull.</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">07</span><h2>mirror</h2></div>
+      <p>A second job rsyncs two things to a public GitHub repo via a scoped token: the site source into site-image/ and the workflow file into github-workflow/. It commits only if something changed. Source lives in two places — the private infra monorepo where it's built, and a public read-only mirror.</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">08</span><h2>dns</h2></div>
+      <p>vin.moe's A record points at the node's IP through a proxied Cloudflare record. Combined with DNS-01, none of Let's Encrypt's validation traffic reaches the origin — the only thing that must be reachable is the origin's own valid cert, and only Cloudflare needs to see it.</p>
     </div>
 
-    <footer>vin.moe</footer>
-  </main>
+    <div class="links" style="margin-top:0.2rem;">
+      <div>
+        <div class="k"># source</div>
+        <a href="https://github.com/Vinnelle/vin.moe">github.com/Vinnelle/vin.moe</a>
+      </div>
+    </div>
+  </section>
 
-  <script>
-    document.querySelectorAll('nav a[data-panel]').forEach((link) => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
-        document.getElementById(link.dataset.panel).classList.add('active');
-        history.replaceState(null, '', link.getAttribute('href'));
-      });
+  <footer>vin.moe</footer>
+</main>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      const name = tab.dataset.tab;
+      tabs.forEach(function (t) { t.classList.toggle('active', t === tab); });
+      panels.forEach(function (p) { p.classList.toggle('active', p.id === name); });
     });
-  </script>
+  });
+</script>
 </body>
 </html>
