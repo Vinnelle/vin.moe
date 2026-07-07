@@ -9,6 +9,9 @@ on:
       - ".github/workflows/site-deploy.yml"
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     uses: ./.github/workflows/site-deploy.yml
