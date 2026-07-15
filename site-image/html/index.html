@@ -58,6 +58,8 @@
   .dim { color: #74746f; font-size: 0.9rem; }
   .label { color: #5c5c58; font-size: 0.8rem; margin-bottom: 0.2rem; }
 
+  .group { color: #f7b9d1; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; margin: 2.8rem 0 0.6rem; }
+
   .links { border-top: 1px solid #1e1e1f; padding-top: 1.3rem; display: flex; gap: 2.4rem; flex-wrap: wrap; margin-top: 1.25rem; }
   .links .k { color: #5c5c58; font-size: 0.8rem; margin-bottom: 0.35rem; }
 
@@ -137,9 +139,10 @@
   <!-- RUNS -->
   <section class="panel" id="runs">
     <p class="muted">The node, cluster, ingress, container registry, DNS, image build, and Deployment spec are all Terraform, applied through HCP Terraform in a private repo. The site itself is a static HTML/CSS page.</p>
-    <p class="lead">Push to merge, live in ~44 seconds — build, registry push, rollout restart.</p>
-    <p class="dim" style="margin-bottom:2.4rem;"><em>AI wrote the HTML/CSS on this page. I do infra, not frontend.</em></p>
+    <p class="lead">Push to merge, live in ~44 seconds — build, registry push, and a rollout pinned to the commit SHA.</p>
+    <p class="dim" style="margin-bottom:0.4rem;"><em>AI wrote the HTML/CSS on this page. I do infra, not frontend.</em></p>
 
+    <div class="group" style="margin-top:2.2rem;">platform</div>
     <div class="topic">
       <div class="topic-head"><span class="topic-num">01</span><h2>cluster</h2></div>
       <p>One Talos node. Control plane and worker, same box (allowSchedulingOnControlPlanes). No managed Kubernetes underneath. The node is provisioned out-of-band; Terraform bootstraps it with the siderolabs/talos provider and stores the resulting kubeconfig as state.</p>
@@ -149,20 +152,22 @@
       <p>Self-hosted Harbor on the same cluster. This site gets its own harbor_project. Pushes and pulls go through a CI robot account whose password is a Terraform random_password — never typed by hand — packaged into a dockerconfigjson secret and mounted as an imagePullSecret.</p>
     </div>
     <div class="topic">
-      <div class="topic-head"><span class="topic-num">03</span><h2>image</h2></div>
-      <p>Two-stage Dockerfile. Stage one is Alpine + imagemagick, converting the source PNG into a multi-resolution favicon.ico (16/32/48/64). Stage two is nginx:alpine with nginx.conf, the static HTML, and the favicon copied in. One server block: try_files with a 404 fallback.</p>
-    </div>
-    <div class="topic">
-      <div class="topic-head"><span class="topic-num">04</span><h2>ingress &amp; tls</h2></div>
+      <div class="topic-head"><span class="topic-num">03</span><h2>ingress &amp; tls</h2></div>
       <p>ingress-nginx runs as a DaemonSet with hostNetwork: true, bound to the node's public IP. No load balancer. Each domain has its own cert-manager ClusterIssuer solving via DNS-01 against Cloudflare. Zone SSL mode is strict, so TLS is independently valid on both hops: browser→edge and edge→origin.</p>
+    </div>
+
+    <div class="group">the site</div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">04</span><h2>image</h2></div>
+      <p>Two-stage Dockerfile. Stage one is Alpine + imagemagick, converting the source PNG into a multi-resolution favicon.ico (16/32/48/64). Stage two is a pinned nginx:1.29-alpine with nginx.conf, the static HTML, and the favicon copied in. The single server block layers a security-header set (HSTS, CSP, nosniff, frame-deny, referrer policy), a /healthz endpoint, and gzip on top of a try_files 404 fallback.</p>
     </div>
     <div class="topic">
       <div class="topic-head"><span class="topic-num">05</span><h2>deployment</h2></div>
-      <p>Two replicas of nginx:alpine behind a ClusterIP Service. 50m CPU / 16Mi requested, 200m / 64Mi limit, readiness probe on / every 10s. A VerticalPodAutoscaler in Auto mode tunes the memory request in that band; CPU is left unmanaged.</p>
+      <p>Two replicas behind a ClusterIP Service. 50m CPU / 16Mi requested, 200m / 64Mi limit. Startup, readiness, and liveness probes all hit /healthz. Rollouts surge to 100% with zero unavailable plus a pre-stop drain, and a PodDisruptionBudget keeps at least one replica serving. A VerticalPodAutoscaler in Auto mode tunes the memory request in that band; CPU is left unmanaged.</p>
     </div>
     <div class="topic">
       <div class="topic-head"><span class="topic-num">06</span><h2>build &amp; deploy</h2></div>
-      <p>A push to the site's path on prd (or a manual workflow_dispatch) triggers GitHub Actions: log into Harbor, buildx build, push back to the same :latest tag, then kubectl rollout restart + rollout status. The tag never changes, so the restart forces the re-pull.</p>
+      <p>A push to the site's path on prd (or a manual workflow_dispatch) triggers GitHub Actions: log into Harbor, buildx build, and push two tags — :latest and the commit SHA. The rollout is a kubectl set-image to the immutable SHA tag followed by rollout status, so every release is a distinct pinned image and a rollback points somewhere real.</p>
     </div>
     <div class="topic">
       <div class="topic-head"><span class="topic-num">07</span><h2>mirror</h2></div>
@@ -171,6 +176,20 @@
     <div class="topic">
       <div class="topic-head"><span class="topic-num">08</span><h2>dns</h2></div>
       <p>vin.moe's A record points at the node's IP through a proxied Cloudflare record. Combined with DNS-01, none of Let's Encrypt's validation traffic reaches the origin — the only thing that must be reachable is the origin's own valid cert, and only Cloudflare needs to see it.</p>
+    </div>
+
+    <div class="group">node &amp; security</div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">09</span><h2>the node</h2></div>
+      <p>Dedicated hardware running Talos Linux — an immutable, API-driven OS with no shell, no SSH, and no package manager; every change goes through its config API, not a login. The ephemeral and state partitions are both LUKS2-encrypted. A host-level ingress firewall defaults to deny, with public web traffic accepted only from Cloudflare's published edge ranges — so the origin quietly ignores direct scans and floods.</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">10</span><h2>defense in depth</h2></div>
+      <p>Public traffic terminates at Cloudflare and is re-encrypted to the origin — strict SSL, independently valid on both hops — with HSTS and a content-security policy on every response. Administrative surfaces sit behind Authelia two-factor; the SSH box is reachable only over a private WireGuard mesh, never the public internet. In-cluster secrets are generated by Terraform and held in HCP Terraform, never committed to the repo, and CI runs on a namespace-scoped token rather than cluster-admin. Workloads run least-privilege under Pod Security Standards.</p>
+    </div>
+    <div class="topic">
+      <div class="topic-head"><span class="topic-num">11</span><h2>watch &amp; recover</h2></div>
+      <p>A self-hosted Wazuh SIEM and a Prometheus / Grafana / Loki / Tempo stack watch the node and every workload. Persistent volumes back up nightly to encrypted object storage on rolling retention, and dependency bumps land automatically through Renovate with a human gate on majors.</p>
     </div>
 
     <div class="links" style="margin-top:0.2rem;">
