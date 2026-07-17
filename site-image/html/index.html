@@ -159,7 +159,7 @@
     <div class="group">the site</div>
     <div class="topic">
       <div class="topic-head"><span class="topic-num">04</span><h2>image</h2></div>
-      <p>Two-stage Dockerfile. Stage one is Alpine + imagemagick, converting the source PNG into a multi-resolution favicon.ico (16/32/48/64). Stage two is a pinned nginx:1.29-alpine with nginx.conf, the static HTML, and the favicon copied in. The single server block layers a security-header set (HSTS, CSP, nosniff, frame-deny, referrer policy), a /healthz endpoint, and gzip on top of a try_files 404 fallback.</p>
+      <p>Two-stage Dockerfile. Stage one is Alpine + imagemagick, converting the source PNG into a multi-resolution favicon.ico (16/32/48/64). Stage two is a pinned nginx:1.29-alpine with nginx.conf, the static HTML, and the favicon copied in. The single server block layers a security-header set (HSTS, CSP, nosniff, frame-deny, referrer policy), a /healthz endpoint, and gzip on top of a try_files fallback that redirects unknown paths back to /.</p>
     </div>
     <div class="topic">
       <div class="topic-head"><span class="topic-num">05</span><h2>deployment</h2></div>
@@ -174,8 +174,8 @@
       <p>A second job rsyncs two things to a public GitHub repo via a scoped token: the site source into site-image/ and the workflow file into github-workflow/. It commits only if something changed. Source lives in two places — the private infra monorepo where it's built, and a public read-only mirror.</p>
     </div>
     <div class="topic">
-      <div class="topic-head"><span class="topic-num">08</span><h2>dns</h2></div>
-      <p>vin.moe's A record points at the node's IP through a proxied Cloudflare record. Combined with DNS-01, none of Let's Encrypt's validation traffic reaches the origin — the only thing that must be reachable is the origin's own valid cert, and only Cloudflare needs to see it.</p>
+      <div class="topic-head"><span class="topic-num">08</span><h2>dns &amp; cdn</h2></div>
+      <p>vin.moe's A record points at the node's IP through a proxied Cloudflare record. Combined with DNS-01, none of Let's Encrypt's validation traffic reaches the origin — the only thing that must be reachable is the origin's own valid cert, and only Cloudflare needs to see it. The proxy also acts as the CDN: a Terraform-managed cache ruleset tells Cloudflare's edge to cache everything on this hostname — HTML included, not just static assets — so most requests never touch the origin at all.</p>
     </div>
 
     <div class="group">node &amp; security</div>
@@ -189,7 +189,7 @@
     </div>
     <div class="topic">
       <div class="topic-head"><span class="topic-num">11</span><h2>watch &amp; recover</h2></div>
-      <p>A self-hosted Wazuh SIEM and a Prometheus / Grafana / Loki / Tempo stack watch the node and every workload. Persistent volumes back up nightly to encrypted object storage on rolling retention, and dependency bumps land automatically through Renovate with a human gate on majors.</p>
+      <p>A Prometheus / Grafana / Loki / Tempo stack watches the node and every workload. Persistent volumes back up nightly to encrypted object storage on rolling retention, and dependency bumps land automatically through Renovate with a human gate on majors.</p>
     </div>
 
     <div class="links" style="margin-top:0.2rem;">

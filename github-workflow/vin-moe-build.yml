@@ -19,6 +19,7 @@ jobs:
       context: hestia/vin-moe/site
       image: vin-moe/site
       deployment: vin-moe-site
+      purge_zone: vin.moe
     secrets: inherit
 
   mirror:
