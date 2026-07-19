@@ -1,4 +1,4 @@
-name: vin-moe site build
+name: Deploy vin-moe
 
 on:
   push:
