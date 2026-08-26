@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>blog — vin.moe</title>
+<meta name="description" content="Full-screen posts from vin.moe.">
+<link rel="canonical" href="https://blog.vin.moe/">
+<link rel="alternate" type="application/atom+xml" title="vin.moe blog" href="/feed.xml">
+<meta name="theme-color" content="#faf8f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c0c0d" media="(prefers-color-scheme: dark)">
+<script>try{const t=localStorage.theme;if(t)document.documentElement.dataset.theme=t}catch{}</script>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/fonts/post.css">
+<link rel="stylesheet" href="/css/post.css">
+<style>@media (scripting: none) { #post { display: none; } }</style>
+</head>
+<body>
+<a class="skip" href="#main">skip to content</a>
+
+<div class="bar">
+  <a class="brand" href="https://vin.moe/">vin.moe</a>
+  <nav class="bar-nav" aria-label="Site">
+    <span class="tabs">
+      <a class="tab" href="https://vin.moe/">about</a>
+      <a class="tab" href="/feed.xml">feed</a>
+    </span>
+  </nav>
+</div>
+
+<main id="main">
+  <article>
+    <header class="page-head">
+      <h1>Blog</h1>
+      <p class="muted">These are just my own thoughts and opinions.</p>
+    </header>
+    <div id="post"><p class="muted">Loading…</p></div>
+    <noscript><p class="muted">Posts are listed here with JavaScript. The <a href="/feed.xml">Atom feed</a> does not need it.</p></noscript>
+  </article>
+  <p class="post-back"><a href="https://vin.moe/#blog">&larr; vin.moe</a></p>
+</main>
+
+<footer>
+  <nav class="foot-nav" aria-label="Source">
+    <a href="/feed.xml">Atom feed</a>
+    <a href="https://github.com/Vinnelle/vin.moe">Site source</a>
+    <a href="https://github.com/Vinnelle/hestia">Infra source</a>
+  </nav>
+  <p class="fingerprint">43B0 BED0 F544 6DF5 4FD0&nbsp; D966 C568 F432 345E C5F4</p>
+</footer>
+
+<script>
+const target = document.getElementById('post');
+
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text !== undefined) node.textContent = text;
+  return node;
+};
+
+const postURL = (slug) => '/posts/' + slug;
+
+const showList = (posts) => {
+  const list = el('ul', 'list');
+  for (const post of posts) {
+    const link = el('a', null, post.title);
+    link.href = postURL(post.slug);
+    const item = el('li');
+    item.append(link);
+    list.append(item);
+  }
+  target.replaceChildren(list);
+};
+
+const render = async () => {
+  let slug = location.hash.slice(1);
+  try { slug = decodeURIComponent(slug); } catch {}
+  if (slug) {
+    location.replace(postURL(slug));
+    return;
+  }
+  try {
+    const res = await fetch('/posts.json', { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error(res.status);
+    showList((await res.json()).posts || []);
+  } catch {
+    target.replaceChildren(el('p', 'muted', 'Posts are not loading right now.'));
+  }
+};
+
+addEventListener('hashchange', render);
+render();
+</script>
+</body>
+</html>

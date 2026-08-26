@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vin.moe/sitemap.xml
+Sitemap: https://blog.vin.moe/sitemap.xml
